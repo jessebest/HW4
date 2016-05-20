@@ -36,9 +36,9 @@ class Bayes_Classifier:
         if os.path.isfile("neg_total"):
             self.neg_total = self.load("neg_total")
         if os.path.isfile("pos_len"):
-            self.pos_len=self.load("pos_len")
+            self.pos_len = self.load("pos_len")
         if os.path.isfile("neg_len"):
-            self.neg_len=self.load("neg_len")
+            self.neg_len = self.load("neg_len")
 
         else:
             self.train()
@@ -56,42 +56,42 @@ class Bayes_Classifier:
 
             if star == '1':
                 self.neg_doc += 1
-                if len(token_list)<10:
-                    neg_len[0]+=1
-                elif len(token_list)<50:
-                    neg_len[1]+=1
-                elif len(token_list)<100:
-                    neg_len[2]+=1
+                if len(token_list) < 10:
+                    neg_len[0] += 1
+                elif len(token_list) < 50:
+                    neg_len[1] += 1
+                elif len(token_list) < 100:
+                    neg_len[2] += 1
                 else:
-                    neg_len[3]+=1
+                    neg_len[3] += 1
                
                 for token in token_list:
                     if token in self.neg_dict.keys():
                         self.neg_dict[token] += 1
                         self.neg_total += 1
                     else:
-                        self.neg_dict[token]=1
-                        self.neg_total+=1
+                        self.neg_dict[token] = 1
+                        self.neg_total += 1
 
 
 
             else:
                 self.pos_doc += 1
-                if len(token_list)<10:
-                    pos_len[0]+=1
-                elif len(token_list)<50:
-                    pos_len[1]+=1
-                elif len(token_list)<100:
-                    pos_len[2]+=1
+                if len(token_list) < 10:
+                    pos_len[0] += 1
+                elif len(token_list) < 50:
+                    pos_len[1] += 1
+                elif len(token_list) < 100:
+                    pos_len[2] += 1
                 else:
-                    pos_len[3]+=1
+                    pos_len[3] += 1
                 for token in token_list:
                     if token in self.pos_dict.keys():
                         self.pos_dict[token] += 1
                         self.pos_total += 1
                     else:
-                        self.pos_dict[token]=1
-                        self.pos_total+=1
+                        self.pos_dict[token] = 1
+                        self.pos_total += 1
 
         common_words=['I', 'am', 'is', 'he', 'she', 'it', 'this', 'that', 'the', 'was', 'were', 'in', 'on', 'at', 'by', 
         'to', 'for', 'about', 'there', 'and', 'or', 'a', 'an', 'of', 'his', 'her', 'their', 'its', 'my', 'me', 'you', 
@@ -99,10 +99,10 @@ class Bayes_Classifier:
 
         for word in common_words:
             if word in pos_dict:
-                pos_total=- pos_dict[word]
+                pos_total -= pos_dict[word]
                 del pos_dict[word]
             if word in neg_dict:
-                neg_total=- neg_dict[word]
+                neg_total -= neg_dict[word]
                 del neg_dict[word]
 
 
@@ -135,16 +135,17 @@ class Bayes_Classifier:
             random.seed(i)
             random.shuffle(pos_filelist)
             random.shuffle(neg_filelist)
-            pos_training=pos_filelist[i*(len(pos_filelist)/10):(i+1)*(len(pos_filelist)/10)]
-            pos_testing=pos_filelist[(i+1)*(len(pos_filelist)/10):]
-            neg_training=neg_filelist[i*(len(neg_filelist)/10):(i+1)*(len(neg_filelist)/10)]
-            neg_testing=neg_filelist[(i+1)*(len(neg_filelist)/10)]
+            pos_training = pos_filelist[i * (len(pos_filelist) / 10):(i + 1) * (len(pos_filelist) / 10)]
+            pos_testing = pos_filelist[(i + 1) * (len(pos_filelist) / 10):]
+            neg_training = neg_filelist[i * (len(neg_filelist) / 10):(i + 1)*(len(neg_filelist) / 10)]
+            neg_testing = neg_filelist[(i + 1) * (len(neg_filelist) / 10)]
             cv_train(pos_training,neg_training)
             cv_classify(pos_testing, neg_testingg)
 
     def cv_train(self, pos_training, neg_traing):
-
+        pass
     def cv_classify(self, pos_testing, neg_testing):
+        pass
 
 
 
@@ -160,17 +161,17 @@ class Bayes_Classifier:
         #print "the total of neg is ", self.neg_total
 
         if len(token_list)<10:
-            pos_prob=math.log((self.pos_len[0])/float(self.pos_doc))
-            neg_prob=math.log((self.neg_len[0])/float(self.neg_doc))
-        elif len(token_list)<50:
-            pos_prob=math.log((self.pos_len[1])/float(self.pos_doc))
-            neg_prob=math.log((self.neg_len[1])/float(self.neg_doc))
-        elif len(token_list)<100:
-            pos_prob=math.log((self.pos_len[2])/float(self.pos_doc))
-            neg_prob=math.log((self.neg_len[2])/float(self.neg_doc))
+            pos_prob = math.log((self.pos_len[0]) / float(self.pos_doc))
+            neg_prob = math.log((self.neg_len[0]) / float(self.neg_doc))
+        elif len(token_list) < 50:
+            pos_prob = math.log((self.pos_len[1]) / float(self.pos_doc))
+            neg_prob = math.log((self.neg_len[1]) / float(self.neg_doc))
+        elif len(token_list) < 100:
+            pos_prob = math.log((self.pos_len[2]) / float(self.pos_doc))
+            neg_prob = math.log((self.neg_len[2]) / float(self.neg_doc))
         else:
-            pos_prob=math.log((self.pos_len[3])/float(self.pos_doc))
-            neg_prob=math.log((self.neg_len[3])/float(self.neg_doc))
+            pos_prob = math.log((self.pos_len[3]) / float(self.pos_doc))
+            neg_prob = math.log((self.neg_len[3]) / float(self.neg_doc))
 
 
         for token in token_list:
