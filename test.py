@@ -1,4 +1,4 @@
-from bayes import *
+from bayes_best import *
 #from collections import Counter
 bc = Bayes_Classifier()
 #print "average length of pos doc is ", bc.pos_total//bc.pos_doc
@@ -11,5 +11,4 @@ bc = Bayes_Classifier()
 # print "most common in neg: "
 # for k,v in n.most_common(50):
 #     print '%s: %i'%(str(k),v)
-result = bc.classify("I love my AI class!")
-print result
+result = bc.ten_cv()

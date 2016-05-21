@@ -54,13 +54,13 @@ class Bayes_Classifier:
             if star == '1':
                 self.neg_doc += 1
                 if len(token_list) < 10:
-                    neg_len[0] += 1
+                    self.neg_len[0] += 1
                 elif len(token_list) < 50:
-                    neg_len[1] += 1
+                    self.neg_len[1] += 1
                 elif len(token_list) < 100:
-                    neg_len[2] += 1
+                    self.neg_len[2] += 1
                 else:
-                    neg_len[3] += 1
+                    self.neg_len[3] += 1
                
                 for token in token_list:
                     if token in self.neg_dict.keys():
@@ -73,13 +73,14 @@ class Bayes_Classifier:
             else:
                 self.pos_doc += 1
                 if len(token_list) < 10:
-                    pos_len[0] += 1
+                    self.pos_len[0] += 1
                 elif len(token_list) < 50:
-                    pos_len[1] += 1
+                    self.pos_len[1] += 1
                 elif len(token_list) < 100:
-                    pos_len[2] += 1
+                    self.pos_len[2] += 1
                 else:
-                    pos_len[3] += 1
+                    self.pos_len[3] += 1
+                
                 for token in token_list:
                     if token in self.pos_dict.keys():
                         self.pos_dict[token] += 1
@@ -93,33 +94,37 @@ class Bayes_Classifier:
         'him', 'who', 'where','which', 'whom', 'be', 'himself', 'herself', 'myself', 'yourself', 'themselves']
 
         for word in common_words:
-            if word in pos_dict:
-                pos_total -= pos_dict[word]
-                del pos_dict[word]
-            if word in neg_dict:
-                neg_total -= neg_dict[word]
-                del neg_dict[word]
+            if word in self.pos_dict:
+                self.pos_total -= self.pos_dict[word]
+                del self.pos_dict[word]
+            if word in self.neg_dict:
+                self.neg_total -= self.neg_dict[word]
+                del self.neg_dict[word]
 
 
 
-        self.save(self.pos_dict, "Positive")
-        self.save(self.neg_dict, "Negative")
-        self.save(self.pos_doc, "pos_doc")
-        self.save(self.neg_doc, "neg_doc")
-        self.save(self.pos_total, "pos_total")
-        self.save(self.neg_total, "neg_total")
-        self.save(self.pos_len, "pos_len")
-        self.save(self.neg_len, "neg_len")
+        # self.save(self.pos_dict, "Positive")
+        # self.save(self.neg_dict, "Negative")
+        # self.save(self.pos_doc, "pos_doc")
+        # self.save(self.neg_doc, "neg_doc")
+        # self.save(self.pos_total, "pos_total")
+        # self.save(self.neg_total, "neg_total")
+        # self.save(self.pos_len, "pos_len")
+        # self.save(self.neg_len, "neg_len")
 
 
-    def ten_cv(trainingset = "movies_reviews/"):
+    def ten_cv(self, trainingset = "movies_reviews/"):
         Filelist = []
 
         for FileObj in os.walk(trainingset):
             Filelist = FileObj[2]
             break
+        
+        print len(Filelist)
 
-        Filelist = random.shuffle(Filelist)
+        random.shuffle(Filelist)
+
+        print len(Filelist)
 
         averageAccuracy = 0
         averagePrecision = 0
