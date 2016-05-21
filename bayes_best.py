@@ -8,50 +8,47 @@ import math, os, pickle, re, random
 
 
 class Bayes_Classifier:
-    def __init__(self):
+    def __init__(self, pos_dict = None, neg_dict = None, pos_total = 0, neg_total = 0, pos_doc = 0, neg_doc = 0, pos_len = None, neg_len = None):
 
         """This method initializes and trains the Naive Bayes Sentiment Classifier.  If a
             cache of a trained classifier has been stored, it loads this cache.  Otherwise,
             the system will proceed through training.  After running this method, the classifier
             is ready to classify input text."""
-        self.pos_dict = {}
-        self.neg_dict = {}
-        self.pos_total = 0
-        self.neg_total = 0
-        self.pos_doc = 0
-        self.neg_doc = 0
-        self.pos_len=[0,0,0,0]
-        self.neg_len=[0,0,0,0]
-
-        if os.path.isfile("Positive"):
-            self.pos_dict = self.load("Positive")
-        if os.path.isfile("Negative"):
-            self.neg_dict = self.load("Negative")
-        if os.path.isfile("pos_doc"):
-            self.pos_doc = self.load("pos_doc")
-        if os.path.isfile("neg_doc"):
-            self.neg_doc = self.load("neg_doc")
-        if os.path.isfile("pos_total"):
-            self.pos_total = self.load("pos_total")
-        if os.path.isfile("neg_total"):
-            self.neg_total = self.load("neg_total")
-        if os.path.isfile("pos_len"):
-            self.pos_len = self.load("pos_len")
-        if os.path.isfile("neg_len"):
-            self.neg_len = self.load("neg_len")
-
+        if pos_dict:
+            self.pos_dict = self.load(pos_dict)
         else:
-            self.train()
+            self.pos_dict = {}
+        if neg_dict:
+            self.neg_dict = self.load(neg_dict)
+        else:
+            self.neg_dict = {}
 
-    def train(self):
-        """Trains the Naive Bayes Sentiment Classifier."""
-        Filelist = []
-        for FileObj in os.walk("movies_reviews/"):
-            Filelist = FileObj[2]
-            break
+        self.pos_total = pos_total
+        self.neg_total = neg_total
+        self.pos_doc = pos_doc
+        self.neg_doc = neg_doc
+        
+        if pos_len:
+            self.pos_len = self.load(pos_len)
+        else:
+            self.pos_len=[0,0,0,0]
+        if neg_len:
+            self.neg_len = self.load(neg_len)
+        else:
+            self.neg_len=[0,0,0,0]
+
+    def train(self, trainingset = "movies_reviews/", traininglist = None):
+        """Trains the Naive Bayes Sentiment Classifier, training set is string of a path to where the training set is."""
+        if not traininglist:
+            Filelist = []
+            for FileObj in os.walk(trainingset):
+                Filelist = FileObj[2]
+                break
+        else:
+            Filelist = traininglist
 
         for path in Filelist:
-            token_list = self.tokenize(self.loadFile("movies_reviews/" + path))
+            token_list = self.tokenize(self.loadFile(trainingset + path))
             star = path[7]
 
             if star == '1':
@@ -72,8 +69,6 @@ class Bayes_Classifier:
                     else:
                         self.neg_dict[token] = 1
                         self.neg_total += 1
-
-
 
             else:
                 self.pos_doc += 1
@@ -117,37 +112,67 @@ class Bayes_Classifier:
         self.save(self.neg_len, "neg_len")
 
 
-    def ten_cv():
+    def ten_cv(trainingset = "movies_reviews/"):
         Filelist = []
-        pos_filelist=[]
-        neg_filelist=[]
-        for FileObj in os.walk("movies_reviews/"):
+
+        for FileObj in os.walk(trainingset):
             Filelist = FileObj[2]
             break
 
-        for path in Filelist:
-            if path[7]=='1':
-                neg_filelist.append(path)
-            else:
-                pos_filelist.append(path)
+        Filelist = random.shuffle(Filelist)
+
+        averageAccuracy = 0
+        averagePrecision = 0
+        averageRecall = 0
+        averageF1 = 0
 
         for i in range(0,10):
-            random.seed(i)
-            random.shuffle(pos_filelist)
-            random.shuffle(neg_filelist)
-            pos_training = pos_filelist[i * (len(pos_filelist) / 10):(i + 1) * (len(pos_filelist) / 10)]
-            pos_testing = pos_filelist[(i + 1) * (len(pos_filelist) / 10):]
-            neg_training = neg_filelist[i * (len(neg_filelist) / 10):(i + 1)*(len(neg_filelist) / 10)]
-            neg_testing = neg_filelist[(i + 1) * (len(neg_filelist) / 10)]
-            cv_train(pos_training,neg_training)
-            cv_classify(pos_testing, neg_testingg)
-
-    def cv_train(self, pos_training, neg_traing):
-        pass
-    def cv_classify(self, pos_testing, neg_testing):
-        pass
-
-
+            validationset = Filelist[i * (len(Filelist) / 10) : (i + 1) * (len(Filelist) / 10)]
+            traininglist = []
+            
+            for f in Filelist:
+                if f not in validationset:
+                    traininglist.append(f)
+            
+            self.train(traininglist = traininglist)
+            true_pos = 0
+            true_neg = 0
+            false_pos = 0
+            false_neg = 0
+            for f in validationset:
+                text = self.loadFile(trainingset + f)
+                guess = self.classify(text)
+                if guess == "Positive" and f[7] == "5":
+                    true_pos += 1
+                elif guess == "Positive" and f[7] == "1":
+                    false_pos += 1
+                elif guess == "Negative" and f[7] == "1":
+                    true_neg += 1
+                elif guess == "Negative" and f[7] == "5":
+                    false_neg += 1
+                else:
+                    print "there is something wrong"
+                    
+            accuracy = (true_pos + true_neg) / float(true_pos + true_neg + false_pos + false_neg)
+            precision = true_pos / float(true_pos + false_pos)
+            recall = true_pos / float(true_pos + false_neg)
+            f1 = (2 * precision * recall) / float(precision + recall)
+            
+            averageAccuracy += accuracy
+            averagePrecision += precision
+            averageRecall += recall
+            averageF1 += f1
+            
+        averageAccuracy = averageAccuracy / 10.0
+        averagePrecision = averagePrecision / 10.0
+        averageRecall = averageRecall / 10.0
+        averageF1 = averageF1 / 10.0
+        
+        print "Average Accuracy: " + averageAccuracy
+        print "Average Precision: " + averagePrecision
+        print "Average Recall: " + averageRecall
+        print "Average F1: " + averageF1
+        return (averageAccuracy, averagePrecision, averageRecall, averageF1)
 
     def classify(self, sText):
         """Given a target string sText, this function returns the most likely document
