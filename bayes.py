@@ -1,10 +1,10 @@
-# Name: 
+# Name:
 # Date:
 # Description:
 #
 #
 
-import math, os, pickle, re
+import math, os, pickle, re, random
 
 
 class Bayes_Classifier:
@@ -27,7 +27,7 @@ class Bayes_Classifier:
         self.neg_total = neg_total
         self.pos_doc = pos_doc
         self.neg_doc = neg_doc
-        
+
 
     def train(self,trainingset = "movies_reviews/", traininglist = None):
         """Trains the Naive Bayes Sentiment Classifier."""
@@ -81,7 +81,7 @@ class Bayes_Classifier:
         for FileObj in os.walk(trainingset):
             Filelist = FileObj[2]
             break
-        
+
         print len(Filelist)
 
         random.shuffle(Filelist)
@@ -96,11 +96,11 @@ class Bayes_Classifier:
         for i in range(0,10):
             validationset = Filelist[i * (len(Filelist) / 10) : (i + 1) * (len(Filelist) / 10)]
             traininglist = []
-            
+
             for f in Filelist:
                 if f not in validationset:
                     traininglist.append(f)
-            
+
             self.train(traininglist = traininglist)
             true_pos = 0
             true_neg = 0
@@ -119,26 +119,31 @@ class Bayes_Classifier:
                     false_neg += 1
                 else:
                     print "there is something wrong"
-                    
+
             accuracy = (true_pos + true_neg) / float(true_pos + true_neg + false_pos + false_neg)
             precision = true_pos / float(true_pos + false_pos)
             recall = true_pos / float(true_pos + false_neg)
             f1 = (2 * precision * recall) / float(precision + recall)
-            
+
             averageAccuracy += accuracy
             averagePrecision += precision
             averageRecall += recall
             averageF1 += f1
-            
+            print "Round:", i
+            print "Average Accuracy: ", averageAccuracy
+            print "Average Precision: ", averagePrecision
+            print "Average Recall: ", averageRecall
+            print "Average F1: ", averageF1
+
         averageAccuracy = averageAccuracy / 10.0
         averagePrecision = averagePrecision / 10.0
         averageRecall = averageRecall / 10.0
         averageF1 = averageF1 / 10.0
-        
-        print "Average Accuracy: " + averageAccuracy
-        print "Average Precision: " + averagePrecision
-        print "Average Recall: " + averageRecall
-        print "Average F1: " + averageF1
+
+        print "Average Accuracy: ", averageAccuracy
+        print "Average Precision: ", averagePrecision
+        print "Average Recall: ", averageRecall
+        print "Average F1: ", averageF1
         return (averageAccuracy, averagePrecision, averageRecall, averageF1)
 
 
@@ -147,7 +152,7 @@ class Bayes_Classifier:
         class to which the target string belongs (i.e., positive, negative or neutral).
         """
         token_list = self.tokenize(sText)
-        
+
         #print "the size of pos_dict is", sum(self.pos_dict.values())
         #print " the size of neg_dict is", sum(self.neg_dict.values())
         #print " the total of pos is ", self.pos_total
@@ -168,7 +173,7 @@ class Bayes_Classifier:
                 neg_prob += math.log((self.neg_dict[token] + 1) / float(self.neg_total))
             else:
                 neg_prob += math.log(1 / float(self.neg_total))
-    
+
         print "pos_prob= ", pos_prob
         print "neg_prob= ", neg_prob
 
